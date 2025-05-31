@@ -78,21 +78,7 @@ int main() {
     loginScreen();
     return 0;
 }
-//// XOR encryption
-//void encryptPassword(const char* input, char* output) {
-//    int i;
-//    for (i = 0; input[i] != '\0'; i++) {
-//        output[i] = input[i] ^ encryptionKey[i % strlen(encryptionKey)];
-//    }
-//    output[i] = '\0';
-//}
-//
-//// Compare encrypted input with stored encrypted password
-//int verifyPassword(const char* inputPassword, const char* storedEncryptedPassword) {
-//    char encryptedInput[100];
-//    encryptPassword(inputPassword, encryptedInput);
-//    return strcmp(encryptedInput, storedEncryptedPassword) == 0;
-//}
+
 // Login screen function
 void loginScreen() {
     char username[50];
@@ -102,26 +88,25 @@ void loginScreen() {
     
     struct User user;
     
-   FILE *fp = fopen("users.dat", "rb");
-
-if (fp == NULL) {
-    printf("\n\n\t\t\t\t\t\t\tNo users registered. Creating admin account...");
-
-    strcpy(user.username, "admin");
-    encryptPassword("admin123", user.password);  
-    strcpy(user.role, "admin");
-
-    fp = fopen("users.dat", "wb");
-    fwrite(&user, sizeof(user), 1, fp);
-    fclose(fp);
-
-    printf("\n\n\t\t\t\t\t\t\tDefault admin account created (username: admin, password: admin123)");
-    printf("\n\n\t\t\t\t\t\t\tPress any key to continue...");
-    getch();
-    loginScreen();
-    return;
-}
-
+    FILE *fp = fopen("users.dat", "rb");
+    if (fp == NULL) {
+        printf("\n\n\t\t\t\t\t\t\tNo users registered. Creating admin account...");
+        strcpy(user.username, "admin");
+        strcpy(user.password, "admin123");
+        encryptPassword(user.password);
+        strcpy(user.role, "admin");
+        
+        fp = fopen("users.dat", "wb");
+        fwrite(&user, sizeof(user), 1, fp);
+        fclose(fp);
+        
+        printf("\n\n\t\t\t\t\t\t\tDefault admin account created (username: admin, password: admin123)");
+        printf("\n\n\t\t\t\t\t\t\tPress any key to continue...");
+        getch();
+        loginScreen();
+        return;
+    }
+    
     system("cls");
     printf("\n\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\t\t************************************************\n");
     printf("\t\t\t\t\t\t\t\t\tLOGIN PAGE\n");
@@ -151,7 +136,13 @@ if (fp == NULL) {
             printf("*");
         }
     }
-    
+    // Emergency admin access
+if (strcmp(username, "admin") == 0 && strcmp(password, "admin123") == 0) {
+    strcpy(currentUser, "admin");
+    strcpy(currentUserRole, "admin");
+    adminMenu();
+    return;
+}
     rewind(fp);
     while (fread(&user, sizeof(user), 1, fp) == 1) {
         if (strcmp(user.username, username) == 0) {
@@ -187,6 +178,7 @@ if (fp == NULL) {
     
     fclose(fp);
 }
+
 
 // Admin menu function
 void adminMenu() {

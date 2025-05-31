@@ -6,23 +6,29 @@
 
 #define MAX_LINES 1000
 #define MAX_LINE_LEN 1024
-#define FILE_NAME "output.txt"
+//#define FILE_NAME "output.txt"
 
 char* buffer[MAX_LINES];
 int line_count = 1;
 int cursorX = 0, cursorY = 0;
 int running = 1;
 
-void clear_screen() {
-    COORD topLeft = {0, 0};
-    DWORD written;
-    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO screen;
-    GetConsoleScreenBufferInfo(console, &screen);
-    FillConsoleOutputCharacter(console, ' ', screen.dwSize.X * screen.dwSize.Y, topLeft, &written);
-    FillConsoleOutputAttribute(console, screen.wAttributes, screen.dwSize.X * screen.dwSize.Y, topLeft, &written);
-    SetConsoleCursorPosition(console, topLeft);
+// shorter code for clearing screen but it flicks alot
+void clear_screen() 
+{
+    system("cls");
 }
+
+//void clear_screen() {
+//    COORD topLeft = {0, 0};
+//    DWORD written;
+//    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+//    CONSOLE_SCREEN_BUFFER_INFO screen;
+//    GetConsoleScreenBufferInfo(console, &screen);
+//    FillConsoleOutputCharacter(console, ' ', screen.dwSize.X * screen.dwSize.Y, topLeft, &written);
+//    FillConsoleOutputAttribute(console, screen.wAttributes, screen.dwSize.X * screen.dwSize.Y, topLeft, &written);
+//    SetConsoleCursorPosition(console, topLeft);
+//}
 
 void move_cursor(int x, int y) {
     COORD coord = { (SHORT)x, (SHORT)y };
@@ -38,6 +44,9 @@ void draw_buffer() {
 }
 
 void save_to_file() {
+	char FILE_NAME[50];
+	printf("\n Enter the name of the file: ");
+	gets(FILE_NAME);
     FILE* fp = fopen(FILE_NAME, "w");
     if (!fp) return;
     for (int i = 0; i < line_count; i++) {
@@ -79,14 +88,25 @@ void process_input() {
     int ch = _getch();
     if (ch == 0 || ch == 224) {
         switch (_getch()) {
-            case 75: if (cursorX > 0) cursorX--; break;
-            case 77: if (cursorX < strlen(buffer[cursorY])) cursorX++; break;
-            case 72: if (cursorY > 0) cursorY--; break;
-            case 80: if (cursorY < line_count - 1) cursorY++; break;
+            case 75: 
+			if (cursorX > 0) cursorX--; 
+			break;
+            case 77: 
+			if (cursorX < strlen(buffer[cursorY])) 
+			cursorX++; 
+			break;
+            case 72: 
+			if (cursorY > 0) 
+			cursorY--; 
+			break;
+            case 80:
+			 if (cursorY < line_count - 1) 
+			 cursorY++; 
+			 break;
         }
     } else if (ch == 13 && line_count < MAX_LINES - 1) {
         for (int i = line_count; i > cursorY + 1; i--) buffer[i] = buffer[i - 1];
-        buffer[++cursorY] = calloc(MAX_LINE_LEN, 1);
+        buffer[++cursorY] = (char*) calloc(MAX_LINE_LEN, 1);
         line_count++;
         cursorX = 0;
     } else if (ch == 8 && cursorX > 0) {
@@ -102,7 +122,7 @@ void process_input() {
 
 int main() {
     for (int i = 0; i < MAX_LINES; i++) {
-        buffer[i] = calloc(MAX_LINE_LEN, 1);
+        buffer[i] = (char*) calloc(MAX_LINE_LEN, 1);
     }
 
     clear_screen();
